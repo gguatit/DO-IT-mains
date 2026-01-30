@@ -1,162 +1,207 @@
-# DO-IT 프로젝트
+# DO-IT
 
-DO-IT은 멘토-멘티 매칭과 커뮤니티 기능을 제공하는 웹 애플리케이션입니다.
+> 멘토-멘티 매칭과 커뮤니티 기능을 제공하는 풀스택 웹 애플리케이션
 
-## 프로젝트 소개
+## Table of Contents
 
-이 프로젝트는 React와 Cloudflare Pages를 사용하여 만든 웹사이트입니다. 사용자들이 서로 멘토와 멘티로 연결되고, 커뮤니티에서 자유롭게 소통할 수 있는 플랫폼입니다.
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Database Schema](#database-schema)
+- [API Reference](#api-reference)
+- [Deployment](#deployment)
+- [Security Notes](#security-notes)
+- [License](#license)
 
-## 주요 기능
+## Overview
 
-### 1. 회원 시스템
-- 회원가입: 아이디, 비밀번호, 이메일로 가입
-- 로그인/로그아웃: 로그인 상태 유지 기능
+DO-IT은 React와 Cloudflare의 서버리스 아키텍처를 활용한 현대적인 웹 애플리케이션입니다. 사용자 인증, 게시판, 댓글 시스템을 포함하고 있으며, Edge Computing을 통해 빠른 응답 속도를 제공합니다.
+
+**Live Demo:** [https://doit.kalpha.kr](https://doit.kalpha.kr)
+
+## Features
+
+### Authentication
+- JWT 기반 사용자 인증
+- 회원가입 및 로그인
+- 세션 지속성 (localStorage)
 - 아이디 중복 체크
-- 모든 회원 정보는 Cloudflare D1 데이터베이스에 저장
 
-### 2. 커뮤니티 게시판
-- 게시글 작성: 로그인한 사용자만 작성 가능
-- 게시글 조회: 누구나 볼 수 있음
-- 게시글 수정/삭제: 본인이 작성한 글만 가능
-- 조회수 자동 증가
-- 댓글 작성 및 조회
+### Community Board
+- CRUD 작업 (생성, 조회, 수정, 삭제)
+- 실시간 조회수 추적
+- 댓글 시스템
+- 작성자 권한 검증
+- 게시글 검색 (제목, 내용)
 
-### 3. 기타 기능
+### User Experience
+- SPA (Single Page Application)
 - 반응형 디자인
-- 검색 기능 (제목, 내용 검색)
-- 한국 시간(KST) 표시
+- 클라이언트 사이드 라우팅
+- 한국 시간대 (KST) 지원
 
-## 기술 스택
+## Tech Stack
 
-### 프론트엔드
-- React 19.1.1
-- React Router DOM 7.13.0
-- Vite 7.1.2 (빌드 도구)
-
-### 백엔드
-- Cloudflare Workers (서버리스)
-- Cloudflare D1 (SQLite 데이터베이스)
-- Cloudflare Pages (호스팅)
-
-### 개발 도구
-- ESLint (코드 품질 검사)
-- Wrangler (Cloudflare 배포 도구)
-
-## 프로젝트 구조
-
+### Frontend
 ```
-DO-IT-main/
-├── functions/           # Cloudflare Functions (백엔드 API)
-│   └── api/
-│       ├── auth/        # 인증 관련 API
-│       │   ├── signup.js    # 회원가입
-│       │   └── login.js     # 로그인
-│       ├── posts/       # 게시글 목록
-│       │   └── index.js
-│       └── post/        # 게시글 상세
-│           ├── [id].js          # 상세/수정/삭제
-│           └── [id]/comments.js # 댓글
-├── src/                 # 프론트엔드 소스
-│   ├── components/      # React 컴포넌트
-│   │   ├── Header.jsx
-│   │   ├── Post.jsx
-│   │   ├── Posts.jsx
-│   │   └── PostCreate.jsx
-│   ├── pages/           # 페이지 컴포넌트
-│   │   ├── Main.jsx
-│   │   ├── Login.jsx
-│   │   └── MemberInput.jsx
-│   ├── contexts/        # React Context
-│   │   └── AuthContext.jsx  # 로그인 상태 관리
-│   ├── css/             # 스타일시트
-│   └── App.jsx          # 메인 앱
-├── worker/              # Cloudflare Worker 설정
-│   └── index.js         # API 라우팅
-├── public/              # 정적 파일
-│   └── images/          # 이미지 파일
-├── package.json         # 프로젝트 설정
-├── vite.config.js       # Vite 설정
-└── wrangler.jsonc       # Cloudflare 설정
+React 19.1.1
+React Router DOM 7.13.0
+Vite 7.1.2
 ```
 
-## 데이터베이스 구조
+### Backend & Infrastructure
+```
+Cloudflare Workers (Serverless Functions)
+Cloudflare D1 (SQLite Database)
+Cloudflare Pages (Static Hosting)
+```
 
-### users 테이블 (사용자 정보)
-- user_id: 사용자 고유 번호 (자동 증가)
-- username: 아이디
-- email: 이메일
-- password: 비밀번호
-- created_at: 가입 일시
+### Development Tools
+```
+ESLint
+Wrangler CLI
+Git
+```
 
-### community_post 테이블 (게시글)
-- post_id: 게시글 번호 (자동 증가)
-- title: 제목
-- content: 내용
-- user_id: 작성자 번호
-- view_count: 조회수
-- created_at: 작성 일시
-- updated_at: 수정 일시
-- deleted_at: 삭제 일시 (삭제 시에만 값 입력)
+## Architecture
 
-### community_comment 테이블 (댓글)
-- comment_id: 댓글 번호 (자동 증가)
-- content: 댓글 내용
-- post_id: 게시글 번호
-- user_id: 작성자 번호
-- created_at: 작성 일시
-- deleted_at: 삭제 일시
+```
+┌─────────────────┐
+│   React SPA     │
+│  (Client-side)  │
+└────────┬────────┘
+         │
+         │ HTTPS
+         │
+┌────────▼────────────────────────────────────┐
+│       Cloudflare Pages                      │
+│  ┌──────────────────────────────────────┐   │
+│  │   Static Assets + SPA Routing        │   │
+│  └──────────────────────────────────────┘   │
+└────────┬────────────────────────────────────┘
+         │
+         │ API Calls
+         │
+┌────────▼────────────────────────────────────┐
+│       Cloudflare Workers                    │
+│  ┌──────────────────────────────────────┐   │
+│  │   API Routes Handler (worker/index)  │   │
+│  │   - Auth APIs                        │   │
+│  │   - Post APIs                        │   │
+│  │   - Comment APIs                     │   │
+│  └────────────┬─────────────────────────┘   │
+└───────────────┼─────────────────────────────┘
+                │
+                │ SQL Queries
+                │
+┌───────────────▼─────────────────────────────┐
+│         Cloudflare D1 Database              │
+│  ┌──────────────────────────────────────┐   │
+│  │   SQLite Tables:                     │   │
+│  │   - users                            │   │
+│  │   - community_post                   │   │
+│  │   - community_comment                │   │
+│  └──────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
 
-## API 엔드포인트
+## Getting Started
 
-### 인증 API
-- POST /api/auth/signup - 회원가입
-- POST /api/auth/login - 로그인
+### Prerequisites
 
-### 게시판 API
-- GET /api/posts - 게시글 목록 조회
-- POST /api/posts - 게시글 작성
-- GET /api/post/:id - 게시글 상세 조회
-- PUT /api/post/:id - 게시글 수정
-- DELETE /api/post/:id - 게시글 삭제
-- GET /api/post/:id/comments - 댓글 목록 조회
-- POST /api/post/:id/comments - 댓글 작성
+- Node.js 18 이상
+- npm 또는 yarn
+- Git
+- Cloudflare 계정 (배포 시 필요)
 
-## 설치 및 실행 방법
+### Installation
 
-### 1. 프로젝트 클론
+1. 저장소 클론
 ```bash
 git clone https://github.com/gguatit/DO-IT-mains.git
 cd DO-IT-main
 ```
 
-### 2. 패키지 설치
+2. 의존성 설치
 ```bash
 npm install
 ```
 
-### 3. 개발 서버 실행
+3. 개발 서버 실행
 ```bash
 npm run dev
 ```
-브라우저에서 http://localhost:5173 으로 접속
 
-### 4. 빌드
-```bash
-npm run build
+4. 브라우저에서 접속
+```
+http://localhost:5173
 ```
 
-### 5. 배포 (Cloudflare Pages)
-```bash
-npm run deploy
-```
+### Available Scripts
 
-## Cloudflare 설정
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | 개발 서버 시작 (localhost:5173) |
+| `npm run build` | 프로덕션 빌드 생성 |
+| `npm run preview` | 빌드된 결과물 미리보기 |
+| `npm run lint` | ESLint 코드 검사 |
+| `npm run deploy` | Cloudflare에 배포 |
 
-### D1 데이터베이스 설정
-Cloudflare 대시보드에서 D1 데이터베이스 생성 후, 다음 SQL을 실행하세요:
+## Database Schema
+
+### users
+
+사용자 계정 정보를 저장합니다.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| user_id | INTEGER | PRIMARY KEY, AUTOINCREMENT | 사용자 고유 ID |
+| username | TEXT | NOT NULL, UNIQUE | 로그인 아이디 |
+| email | TEXT | UNIQUE | 이메일 주소 |
+| password | TEXT | NOT NULL | 비밀번호 (평문 저장) |
+| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 계정 생성 시각 |
+
+### community_post
+
+게시글 데이터를 저장합니다.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| post_id | INTEGER | PRIMARY KEY, AUTOINCREMENT | 게시글 고유 ID |
+| title | TEXT | NOT NULL | 게시글 제목 |
+| content | TEXT | NOT NULL | 게시글 본문 |
+| user_id | INTEGER | FOREIGN KEY | 작성자 ID |
+| view_count | INTEGER | DEFAULT 0 | 조회수 |
+| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 작성 시각 |
+| updated_at | DATETIME | | 수정 시각 |
+| deleted_at | DATETIME | | 삭제 시각 (soft delete) |
+
+### community_comment
+
+댓글 데이터를 저장합니다.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| comment_id | INTEGER | PRIMARY KEY, AUTOINCREMENT | 댓글 고유 ID |
+| content | TEXT | NOT NULL | 댓글 내용 |
+| post_id | INTEGER | NOT NULL, FOREIGN KEY | 게시글 ID |
+| user_id | INTEGER | FOREIGN KEY | 작성자 ID |
+| created_at | DATETIME | DEFAULT CURRENT_TIMESTAMP | 작성 시각 |
+| deleted_at | DATETIME | | 삭제 시각 (soft delete) |
+
+### Database Setup
+
+Cloudflare D1 콘솔에서 다음 SQL을 실행하세요:
 
 ```sql
--- users 테이블
+-- 테이블 삭제 (초기화)
+DROP TABLE IF EXISTS community_comment;
+DROP TABLE IF EXISTS community_post;
+DROP TABLE IF EXISTS users;
+
+-- users 테이블 생성
 CREATE TABLE users (
   user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
   username TEXT NOT NULL UNIQUE, 
@@ -165,7 +210,7 @@ CREATE TABLE users (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- community_post 테이블
+-- community_post 테이블 생성
 CREATE TABLE community_post (
   post_id INTEGER PRIMARY KEY AUTOINCREMENT, 
   title TEXT NOT NULL, 
@@ -178,7 +223,7 @@ CREATE TABLE community_post (
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- community_comment 테이블
+-- community_comment 테이블 생성
 CREATE TABLE community_comment (
   comment_id INTEGER PRIMARY KEY AUTOINCREMENT, 
   content TEXT NOT NULL, 
@@ -191,35 +236,192 @@ CREATE TABLE community_comment (
 );
 ```
 
-### wrangler.jsonc 설정
-`database_id`를 본인의 D1 데이터베이스 ID로 변경하세요.
+## API Reference
 
-## 주요 명령어
+### Authentication Endpoints
 
-```bash
-npm run dev          # 개발 서버 실행
-npm run build        # 프로덕션 빌드
-npm run preview      # 빌드 결과 미리보기
-npm run lint         # 코드 품질 검사
-npm run deploy       # Cloudflare에 배포
+#### POST /api/auth/signup
+회원가입 API
+
+**Request Body:**
+```json
+{
+  "username": "string",
+  "nickname": "string",
+  "password": "string",
+  "email": "string"
+}
 ```
 
-## 보안 참고사항
+**Response:**
+```json
+{
+  "success": true,
+  "user": {
+    "user_id": 1,
+    "username": "string",
+    "email": "string"
+  }
+}
+```
 
-현재 버전은 학습 및 데모 목적으로 만들어졌습니다. 실제 서비스에서는 다음 사항을 개선해야 합니다:
+#### POST /api/auth/login
+로그인 API
 
-1. 비밀번호 암호화 (현재 평문 저장)
-2. JWT 토큰 기반 인증
-3. HTTPS 강제 사용
-4. SQL Injection 방어
-5. XSS 공격 방어
-6. CSRF 토큰 사용
-7. Rate Limiting (요청 제한)
+**Request Body:**
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
 
-## 라이선스
+**Response:**
+```json
+{
+  "success": true,
+  "user": {
+    "user_id": 1,
+    "username": "string",
+    "email": "string"
+  }
+}
+```
 
-이 프로젝트는 개인 학습 목적으로 만들어졌습니다.
+### Post Endpoints
 
-## 문의
+#### GET /api/posts
+게시글 목록 조회
 
-프로젝트 관련 문의사항은 Issues 탭에 남겨주세요.
+**Response:**
+```json
+[
+  {
+    "post_id": 1,
+    "title": "string",
+    "content": "string",
+    "user_id": 1,
+    "view_count": 10,
+    "created_at": "2026-01-31 00:00:00",
+    "comment_count": 5
+  }
+]
+```
+
+#### POST /api/posts
+게시글 작성 (인증 필요)
+
+**Request Body:**
+```json
+{
+  "title": "string",
+  "content": "string",
+  "user_id": 1
+}
+```
+
+#### GET /api/post/:id
+게시글 상세 조회 (조회수 자동 증가)
+
+#### PUT /api/post/:id
+게시글 수정 (작성자만 가능)
+
+#### DELETE /api/post/:id
+게시글 삭제 (작성자만 가능, soft delete)
+
+### Comment Endpoints
+
+#### GET /api/post/:id/comments
+댓글 목록 조회
+
+#### POST /api/post/:id/comments
+댓글 작성 (인증 필요)
+
+## Deployment
+
+### Cloudflare Pages 배포
+
+1. wrangler.jsonc 설정 확인
+```jsonc
+{
+  "name": "doit",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-27",
+  "assets": {
+    "not_found_handling": "single-page-application"
+  },
+  "d1_databases": [
+    {
+      "binding": "D1_DB",
+      "database_name": "doit",
+      "database_id": "YOUR_DATABASE_ID"
+    }
+  ]
+}
+```
+
+2. 빌드 및 배포
+```bash
+npm run deploy
+```
+
+### Environment Variables
+
+필요한 환경 변수 없음 (D1 바인딩 사용)
+
+### Build Settings (Cloudflare Pages)
+
+| Setting | Value |
+|---------|-------|
+| Build command | `npm run build` |
+| Build output directory | `dist/client` |
+| Root directory | `/` |
+
+## Security Notes
+
+현재 구현은 학습 및 프로토타입 목적입니다. 프로덕션 환경에서는 다음 사항을 개선해야 합니다:
+
+- [ ] 비밀번호 해싱 (bcrypt, argon2)
+- [ ] JWT 토큰 기반 인증
+- [ ] CSRF 보호
+- [ ] Rate limiting
+- [ ] Input sanitization
+- [ ] SQL injection 방어 강화
+- [ ] XSS 방어
+- [ ] HTTPS 강제
+- [ ] 환경 변수 관리
+
+## Project Structure
+
+```
+DO-IT-main/
+├── functions/              # Cloudflare Functions
+│   └── api/
+│       ├── auth/          # 인증 API
+│       ├── posts/         # 게시글 목록 API
+│       └── post/          # 게시글 상세 API
+├── src/                   # React 소스
+│   ├── components/        # UI 컴포넌트
+│   ├── pages/            # 페이지 컴포넌트
+│   ├── contexts/         # React Context
+│   ├── css/              # 스타일시트
+│   └── App.jsx           # 루트 컴포넌트
+├── worker/               # Worker 설정
+│   └── index.js         # API 라우터
+├── public/              # 정적 파일
+├── package.json         # 프로젝트 메타데이터
+├── vite.config.js      # Vite 설정
+└── wrangler.jsonc      # Cloudflare 설정
+```
+
+## Contributing
+
+이슈와 풀 리퀘스트를 환영합니다.
+
+## License
+
+이 프로젝트는 교육 목적으로 제작되었습니다.
+
+## Contact
+
+프로젝트 관련 문의: [GitHub Issues](https://github.com/gguatit/DO-IT-mains/issues)
