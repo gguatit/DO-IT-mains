@@ -46,10 +46,11 @@ function CommunityInput() {
       // 방금 생성한 글 id로 이동(가능하면)
       const newId = data?.result?.meta?.last_row_id;
       if (newId) navigate(`/post/${newId}`);
-      else navigate("/community"); // 없으면 목록으로
+      else navigate("/post"); // 없으면 목록으로
     } catch (err) {
       console.error(err);
       alert("서버 요청 중 오류가 발생했습니다.");
+      navigate("/post"); // 오류 시에도 목록으로
     }
   };
 
