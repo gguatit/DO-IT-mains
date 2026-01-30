@@ -1,6 +1,7 @@
 import "../css/CommunityInput.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const no = () => {
   alert("아직 구현되지 않은 기능입니다.");
@@ -9,16 +10,30 @@ const no = () => {
 function CommunityInput() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
 
     try {
       const resp = await fetch("/api/posts", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ title, content, user_id: 1 }),
+        body: JSON.stringify({ title, content, user_id: user.user_id }),
       });
 
       const data = await resp.json();

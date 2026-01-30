@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const Post = () => {
   const { id } = useParams();
-
-  // ✅ 임시 로그인 유저(나중에 로그인 붙이면 바꾸기)
-  const currentUserId = 1;
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [post, setPost] = useState(null);
 
@@ -44,12 +44,18 @@ const Post = () => {
 
   // 댓글 작성
   const addComment = async () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
     if (!newComment.trim()) return;
 
     const resp = await fetch(`/api/post/${id}/comments`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ content: newComment, user_id: currentUserId }),
+      body: JSON.stringify({ content: newComment, user_id: user.user_id }),
     });
 
     const data = await resp.json();
@@ -65,6 +71,12 @@ const Post = () => {
 
   // ✅ 글 수정 저장
   const saveEdit = async () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
     if (!editTitle.trim() || !editContent.trim()) {
       alert("제목/내용을 입력해줘!");
       return;
@@ -76,7 +88,7 @@ const Post = () => {
       body: JSON.stringify({
         title: editTitle,
         content: editContent,
-        user_id: currentUserId,
+        user_id: user.user_id,
       }),
     });
 
@@ -93,12 +105,18 @@ const Post = () => {
 
   // ✅ 글 삭제
   const deletePost = async () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
+    }
+
     if (!window.confirm("정말 삭제할까?")) return;
 
     const resp = await fetch(`/api/post/${id}`, {
       method: "DELETE",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ user_id: currentUserId }),
+      body: JSON.stringify({ user_id: user.user_id }),
     });
 
     const data = await resp.json();
