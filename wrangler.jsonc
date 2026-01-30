@@ -7,9 +7,9 @@
 	"name": "doit",
 	"main": "worker/index.js",
 	"compatibility_date": "2025-09-27",
-	// "assets": {
-	// 	"not_found_handling": "single-page-application"
-	// },
+	"assets": {
+		"not_found_handling": "single-page-application"
+	},
 	"observability": {
 		"enabled": true
 	},
@@ -17,7 +17,7 @@
 		{
 		"binding": "D1_DB",  // Worker 코드 내에서 사용할 바인딩 이름
 		"database_name": "doit",  // 데이터베이스 이름
-		"database_id": "d1ffcd3b-d92c-4f34-b7e4-0aa9f445eba8"  // D1 데이터베이스의 고유 ID
+		"database_id": "7c711e49-889b-4bc7-96bb-34e7898238dc"  // D1 데이터베이스의 고유 ID
 		}
 	]
 	/**
