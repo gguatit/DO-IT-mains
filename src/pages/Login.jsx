@@ -10,7 +10,7 @@ function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
         if (!username.trim() || !password.trim()) {
@@ -18,20 +18,25 @@ function Login() {
             return;
         }
 
-        // localStorage에서 사용자 찾기
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.username === username && u.password === password);
-
-        if (user) {
-            login({
-                user_id: user.user_id,
-                username: user.username,
-                email: user.email
+        try {
+            const resp = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ username, password })
             });
-            alert('로그인 성공!');
-            navigate('/');
-        } else {
-            alert('아이디 또는 비밀번호가 잘못되었습니다.');
+
+            const data = await resp.json();
+
+            if (data.success) {
+                login(data.user);
+                alert('로그인 성공!');
+                navigate('/');
+            } else {
+                alert(data.message || '로그인 실패');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('서버 요청 중 오류가 발생했습니다.');
         }
     };
 

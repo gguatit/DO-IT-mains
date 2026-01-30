@@ -1,7 +1,6 @@
 import '../css/MemberInput.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 function MemberInput() {
     const [username, setUsername] = useState('');
@@ -9,26 +8,34 @@ function MemberInput() {
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [email, setEmail] = useState('');
-    const { signup } = useAuth();
     const navigate = useNavigate();
 
-    const checkUserId = () => {
+    const checkUserId = async () => {
         if (!username.trim()) {
             alert('아이디를 입력하세요.');
             return;
         }
 
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const exists = users.some(u => u.username === username);
-
-        if (exists) {
-            alert('이미 사용 중인 아이디입니다.');
-        } else {
+        try {
+            // 간단하게 확인용 API 호출 (실패 시 사용 가능)
+            const resp = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ username, password: 'temp', email: 'temp@temp.com' })
+            });
+            const data = await resp.json();
+            
+            if (resp.status === 409) {
+                alert('이미 사용 중인 아이디입니다.');
+            } else {
+                alert('사용 가능한 아이디입니다.');
+            }
+        } catch (error) {
             alert('사용 가능한 아이디입니다.');
         }
     };
 
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
 
         // 입력 검증
@@ -48,18 +55,29 @@ function MemberInput() {
         }
 
         // 회원가입 처리
-        const result = signup({
-            username,
-            nickname,
-            password: password1,
-            email
-        });
+        try {
+            const resp = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    nickname,
+                    password: password1,
+                    email
+                })
+            });
 
-        if (result.success) {
-            alert('회원가입이 완료되었습니다!');
-            navigate('/login');
-        } else {
-            alert(result.message || '회원가입에 실패했습니다.');
+            const data = await resp.json();
+
+            if (data.success) {
+                alert('회원가입이 완료되었습니다!');
+                navigate('/login');
+            } else {
+                alert(data.message || '회원가입에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert('서버 요청 중 오류가 발생했습니다.');
         }
     };
 
