@@ -19,7 +19,7 @@
 		"database_name": "doit",  // 데이터베이스 이름
 		"database_id": "d1ffcd3b-d92c-4f34-b7e4-0aa9f445eba8"  // D1 데이터베이스의 고유 ID
 		}
-	],
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
