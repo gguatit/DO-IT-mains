@@ -142,7 +142,7 @@ const Post = () => {
   return (
     <div>
       {/* ✅ 내 글일 때만 수정/삭제 */}
-      {post.user_id === currentUserId && (
+      {user && post.user_id === user.user_id && (
         <div style={{ margin: "10px 0" }}>
           {!isEditing ? (
             <>
