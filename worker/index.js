@@ -1,21 +1,43 @@
-import * as posts from "../functions/api/posts";
-import * as postById from "../functions/api/post/[[id]]";
+import * as posts from "../functions/api/posts/index.js";
+import * as postById from "../functions/api/post/[id].js";
+import * as postComments from "../functions/api/post/[id]/comments.js";
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const method = request.method;
 
+    // /api/posts (목록 조회 & 작성)
     if (url.pathname === "/api/posts") {
-      // /api/posts 경로로 요청이 들어오면 posts.onRequestGet 호출
-      return posts.onRequestGet({ env });
-    } else if (url.pathname.startsWith("/api/post/")) {
-      // /api/post/:id 경로로 요청이 들어오면 ID 추출하여 postById.onRequestGet 호출
-      const id = url.pathname.replace(/^\/api\/post\/+/, '');
-      const context = { params: { id } };
-      return postById.onRequestGet({ env, params: context.params });
+      if (method === "GET") return posts.onRequestGet({ env });
+      if (method === "POST") return posts.onRequestPost({ request, env });
     }
 
-    // 위 두 조건에 맞지 않으면 404 응답
-    return new Response(null, { status: 404 });
+    // /api/post/:id (상세 조회, 수정, 삭제)
+    const postMatch = url.pathname.match(/^\/api\/post\/(\d+)$/);
+    if (postMatch) {
+      const id = postMatch[1];
+      const params = { id };
+      
+      if (method === "GET") return postById.onRequestGet({ env, params });
+      if (method === "PUT") return postById.onRequestPut({ env, params, request });
+      if (method === "DELETE") return postById.onRequestDelete({ env, params, request });
+    }
+
+    // /api/post/:id/comments (댓글 조회 & 작성)
+    const commentsMatch = url.pathname.match(/^\/api\/post\/(\d+)\/comments$/);
+    if (commentsMatch) {
+      const id = commentsMatch[1];
+      const params = { id };
+      
+      if (method === "GET") return postComments.onRequestGet({ env, params });
+      if (method === "POST") return postComments.onRequestPost({ env, params, request });
+    }
+
+    // 404
+    return new Response(JSON.stringify({ message: "Not Found" }), { 
+      status: 404,
+      headers: { "content-type": "application/json" }
+    });
   }
 }
